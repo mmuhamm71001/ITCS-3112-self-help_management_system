@@ -22,7 +22,7 @@ namespace StudentPlanner
             Console.Write("Password : ");
             string password = Console.ReadLine()?.Trim();
 
-            if (!user.Authenticate(password))
+            if (email != user.GetEmail() || !user.Authenticate(password))
             {
                 Console.WriteLine("\n[!] Invalid credentials. Exiting.");
                 return;
