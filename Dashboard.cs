@@ -153,8 +153,44 @@ namespace StudentPlanner.Presentation
 
         private void AddTask()
         {
-            // Stub: full implementation handled by Task/ActionPlan owners
-            Console.WriteLine("\n  [Add Task — coming soon]");
+            Console.WriteLine("\n--- Add Task ---");
+            Console.WriteLine("  Type: (1) Assignment  (2) Personal Goal");
+            Console.Write("  Choice: ");
+            string typeChoice = Console.ReadLine()?.Trim();
+
+            Console.Write("  Title: ");
+            string title = Console.ReadLine()?.Trim();
+
+            Console.Write("  Due date (yyyy-MM-dd): ");
+            if (!DateTime.TryParse(Console.ReadLine()?.Trim(), out DateTime dueDate))
+            {
+                Console.WriteLine("  [!] Invalid date. Task not added.");
+                return;
+            }
+
+            Task newTask;
+
+            if (typeChoice == "1")
+            {
+                Console.Write("  Course name: ");
+                string course = Console.ReadLine()?.Trim();
+                newTask = new Assignment(title, dueDate, course);
+            }
+            else if (typeChoice == "2")
+            {
+                Console.Write("  Category (e.g. Health, Career): ");
+                string category = Console.ReadLine()?.Trim();
+                newTask = new PersonalGoal(title, dueDate, category);
+            }
+            else
+            {
+                Console.WriteLine("  [!] Invalid type. Task not added.");
+                return;
+            }
+
+            tasks.Add(newTask);
+            plan.AddStep(newTask);
+            Console.WriteLine("  Task added successfully.");
         }
 
         private void ViewPlan()
@@ -165,8 +201,29 @@ namespace StudentPlanner.Presentation
 
         private void DailyCheckin()
         {
-            // Stub: full implementation handled by DailyCheckin owner
-            Console.WriteLine("\n  [Daily Check-in — coming soon]");
+            Console.WriteLine("\n--- Daily Check-in ---");
+            string today = DateTime.Today.ToString("yyyy-MM-dd");
+            Console.WriteLine($"  Date: {today}\n");
+
+            bool found = false;
+            foreach (var t in tasks)
+            {
+                if (t is PersonalGoal goal)
+                {
+                    found = true;
+                    Console.WriteLine($"  {t.GetSummary()}");
+                    Console.Write("  Update progress % (or press Enter to skip): ");
+                    string input = Console.ReadLine()?.Trim();
+                    if (int.TryParse(input, out int pct))
+                    {
+                        goal.UpdateProgress(pct);
+                        Console.WriteLine($"  Progress updated to {pct}%.");
+                    }
+                }
+            }
+
+            if (!found)
+                Console.WriteLine("  No personal goals to check in on.");
         }
     }
 }
