@@ -22,9 +22,7 @@ namespace StudentPlanner.Domain
         /// <summary>
         /// Returns the person's full name.
         /// </summary>
-        public string GetName()
-        {
-            return name;
-        }
+        public string GetName()  => name;
+        public string GetEmail() => email;
     }
 }
