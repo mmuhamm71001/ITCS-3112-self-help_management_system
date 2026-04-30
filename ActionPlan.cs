@@ -3,39 +3,65 @@ using System.Collections.Generic;
 
 namespace StudentPlanner.Domain
 {
-    /// <summary>
-    /// An ordered collection of tasks that forms the user's action plan.
-    /// </summary>
+    
     public class ActionPlan
     {
-        private List<Task> steps;
+        private int planId;
+        private int availableDays;
+        private List<Task> orderedTasks;
 
-        public ActionPlan()
+        public ActionPlan(int availableDays = 7)
         {
-            steps = new List<Task>();
+            this.planId = new Random().Next(1000, 9999);
+            this.availableDays = availableDays;
+            this.orderedTasks = new List<Task>();
         }
 
-        /// <summary>
-        /// Adds a task as the next step in the plan.
-        /// </summary>
-        public void AddStep(Task task)
+    
+        public void AddTask(Task task)
         {
-            steps.Add(task);
+            orderedTasks.Add(task);
         }
 
-        /// <summary>
-        /// Prints all steps to the console, numbered from 1.
-        /// </summary>
+        public void DistributeAcrossDays()
+        {
+            if (orderedTasks.Count == 0)
+                return;
+
+            Console.WriteLine("\n--- Task Distribution ---");
+
+            int day = 1;
+            foreach (var task in orderedTasks)
+            {
+                Console.WriteLine($"Day {day}: {task.GetSummary()}");
+
+                day++;
+                if (day > availableDays)
+                    day = 1; // loop back if tasks exceed days
+            }
+        }
+
+    
+        public List<Task> GetOrderedList()
+        {
+            return orderedTasks;
+        }
+
         public void Display()
         {
-            if (steps.Count == 0)
+            if (orderedTasks.Count == 0)
             {
                 Console.WriteLine("  No steps in your action plan yet.");
                 return;
             }
 
-            for (int i = 0; i < steps.Count; i++)
-                Console.WriteLine($"  {i + 1}. {steps[i].GetSummary()}");
+            Console.WriteLine($"  Plan ID: {planId}");
+            Console.WriteLine($"  Available Days: {availableDays}");
+
+            for (int i = 0; i < orderedTasks.Count; i++)
+            {
+                Console.WriteLine($"  {i + 1}. {orderedTasks[i].GetSummary()}");
+            }
         }
     }
 }
