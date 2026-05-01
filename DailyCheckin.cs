@@ -1,38 +1,37 @@
-using System;
-
-namespace StudentPlanner.Domain
+private void DailyCheckin()
 {
-  
-    public class DailyCheckin
+    Console.WriteLine("\n--- Daily Check-in ---");
+    Console.WriteLine("How are you feeling today?");
+    Console.WriteLine("  1. Great");
+    Console.WriteLine("  2. Okay");
+    Console.WriteLine("  3. Stressed");
+    Console.Write("Choice: ");
+
+    string moodChoice = Console.ReadLine()?.Trim();
+    MoodStatus mood;
+
+    switch (moodChoice)
     {
-        private DateTime checkinDate;
-        private MoodStatus mood;
-        private string notes;
-
-        public DailyCheckin()
-        {
-            checkinDate = DateTime.Today;
+        case "1":
+            mood = MoodStatus.Great;
+            break;
+        case "2":
             mood = MoodStatus.Okay;
-            notes = string.Empty;
-        }
-
-        public void RecordMood(MoodStatus mood, string notes)
-        {
-            this.mood = mood;
-            this.notes = notes;
-            this.checkinDate = DateTime.Today;
-        }
-
-        public MoodStatus GetMood()
-        {
-            return mood;
-        }
-
-        public void Display()
-        {
-            Console.WriteLine($"Date : {checkinDate:yyyy-MM-dd}");
-            Console.WriteLine($"Mood : {mood}");
-            Console.WriteLine($"Notes: {notes}");
-        }
+            break;
+        case "3":
+            mood = MoodStatus.Stressed;
+            break;
+        default:
+            Console.WriteLine("Invalid choice. Mood set to Okay.");
+            mood = MoodStatus.Okay;
+            break;
     }
+
+    Console.Write("Notes for today: ");
+    string notes = Console.ReadLine()?.Trim();
+
+    checkin.RecordMood(mood, notes);
+
+    Console.WriteLine("\nCheck-in saved:");
+    checkin.Display();
 }
