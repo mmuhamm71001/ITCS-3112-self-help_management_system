@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace StudentPlanner.Domain
 {
     
-    public class ActionPlan
+    public class ActionPlan : IActionPlan
     {
         private int planId;
         private int availableDays;
@@ -28,16 +28,13 @@ namespace StudentPlanner.Domain
             if (orderedTasks.Count == 0)
                 return;
 
-            Console.WriteLine("\n--- Task Distribution ---");
-
             int day = 1;
             foreach (var task in orderedTasks)
             {
                 Console.WriteLine($"Day {day}: {task.GetSummary()}");
-
                 day++;
                 if (day > availableDays)
-                    day = 1; // loop back if tasks exceed days
+                    day = 1;
             }
         }
 

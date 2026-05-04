@@ -8,16 +8,16 @@ namespace StudentPlanner.Presentation
     {
         private User currentUser;
         private List<Task> tasks;
-        private ActionPlan plan;
-        private DailyCheckin checkin;
+        private IActionPlan plan;
+        private IDailyCheckin checkin;
         private bool isRunning;
 
-        public Dashboard(User user)
+        public Dashboard(User user, IActionPlan plan, IDailyCheckin checkin)
         {
             currentUser = user;
             tasks = new List<Task>();
-            plan = new ActionPlan();
-            checkin = new DailyCheckin();
+            this.plan = plan;
+            this.checkin = checkin;
             isRunning = false;
         }
 
@@ -121,25 +121,17 @@ namespace StudentPlanner.Presentation
                 return;
             }
 
-            Task newTask;
-
-            if (typeChoice == "1")
-            {
-                Console.Write("  Course name: ");
-                string course = Console.ReadLine()?.Trim();
-                newTask = new Assignment(title, dueDate, course);
-            }
-            else if (typeChoice == "2")
-            {
-                Console.Write("  Category (e.g. Health, Career): ");
-                string category = Console.ReadLine()?.Trim();
-                newTask = new PersonalGoal(title, dueDate, category);
-            }
-            else
+            if (typeChoice != "1" && typeChoice != "2")
             {
                 Console.WriteLine("  [!] Invalid type. Task not added.");
                 return;
             }
+
+            string prompt = typeChoice == "1" ? "  Course name: " : "  Category (e.g. Health, Career): ";
+            Console.Write(prompt);
+            string extra = Console.ReadLine()?.Trim();
+
+            Task newTask = TaskFactory.Create(typeChoice, title, dueDate, extra);
 
             tasks.Add(newTask);
             plan.AddTask(newTask);

@@ -2,7 +2,7 @@ using System;
 
 namespace StudentPlanner.Domain
 {
-    public class DailyCheckin
+    public class DailyCheckin : IDailyCheckin
     {
         private MoodStatus currentMood;
         private string notes;

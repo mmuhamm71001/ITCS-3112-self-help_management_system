@@ -30,7 +30,10 @@ namespace StudentPlanner
                 return;
             }
 
-            Dashboard dashboard = new Dashboard(user);
+            IActionPlan plan = new ActionPlan();
+            IDailyCheckin checkin = new DailyCheckin();
+
+            Dashboard dashboard = new Dashboard(user, plan, checkin);
             dashboard.Run();
         }
     }

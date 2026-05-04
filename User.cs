@@ -8,7 +8,7 @@ namespace StudentPlanner.Domain
     /// Represents a registered user of the planner application.
     /// Extends Person with authentication capabilities.
     /// </summary>
-    public class User : Person
+    public class User : Person, IAuthenticatable
     {
         private string passwordHash;
 
