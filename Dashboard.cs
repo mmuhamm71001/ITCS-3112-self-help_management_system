@@ -9,15 +9,13 @@ namespace StudentPlanner.Presentation
         private User currentUser;
         private List<Task> tasks;
         private IActionPlan plan;
-        private IDailyCheckin checkin;
         private bool isRunning;
 
-        public Dashboard(User user, IActionPlan plan, IDailyCheckin checkin)
+        public Dashboard(User user, IActionPlan plan)
         {
             currentUser = user;
             tasks = new List<Task>();
             this.plan = plan;
-            this.checkin = checkin;
             isRunning = false;
         }
 
@@ -45,9 +43,8 @@ namespace StudentPlanner.Presentation
             Console.WriteLine("  1. View my tasks");
             Console.WriteLine("  2. Add a task");
             Console.WriteLine("  3. View action plan");
-            Console.WriteLine("  4. Daily check-in");
-            Console.WriteLine("  5. View my profile");
-            Console.WriteLine("  6. Exit");
+            Console.WriteLine("  4. View my profile");
+            Console.WriteLine("  5. Exit");
             Console.WriteLine("==============================");
             Console.Write("Enter choice: ");
         }
@@ -68,12 +65,9 @@ namespace StudentPlanner.Presentation
                     ViewPlan();
                     break;
                 case "4":
-                    DailyCheckin();
-                    break;
-                case "5":
                     currentUser.DisplayProfile();
                     break;
-                case "6":
+                case "5":
                     isRunning = false;
                     break;
                 default:
@@ -85,7 +79,7 @@ namespace StudentPlanner.Presentation
         private void HandleInvalidInput(string input)
         {
             string display = string.IsNullOrWhiteSpace(input) ? "(empty)" : $"\"{input}\"";
-            Console.WriteLine($"\n  [!] {display} is not a valid option. Please enter a number from 1 to 6.");
+            Console.WriteLine($"\n  [!] {display} is not a valid option. Please enter a number from 1 to 5.");
         }
 
         private void ViewTasks()
@@ -107,83 +101,135 @@ namespace StudentPlanner.Presentation
         private void AddTask()
         {
             Console.WriteLine("\n--- Add Task ---");
-            Console.WriteLine("  Type: (1) Assignment  (2) Personal Goal");
+            Console.WriteLine("  Type:");
+            Console.WriteLine("    1. Assignment");
+            Console.WriteLine("    2. Health / Fitness");
+            Console.WriteLine("    3. Career");
+            Console.WriteLine("    4. Finance");
+            Console.WriteLine("    5. Learning");
+            Console.WriteLine("    6. Other");
             Console.Write("  Choice: ");
             string typeChoice = Console.ReadLine()?.Trim();
 
-            Console.Write("  Title: ");
-            string title = Console.ReadLine()?.Trim();
-
-            Console.Write("  Due date (yyyy-MM-dd): ");
-            if (!DateTime.TryParse(Console.ReadLine()?.Trim(), out DateTime dueDate))
-            {
-                Console.WriteLine("  [!] Invalid date. Task not added.");
-                return;
-            }
-
-            if (typeChoice != "1" && typeChoice != "2")
+            if (typeChoice != "1" && typeChoice != "2" && typeChoice != "3" &&
+                typeChoice != "4" && typeChoice != "5" && typeChoice != "6")
             {
                 Console.WriteLine("  [!] Invalid type. Task not added.");
                 return;
             }
 
-            string prompt = typeChoice == "1" ? "  Course name: " : "  Category (e.g. Health, Career): ";
-            Console.Write(prompt);
-            string extra = Console.ReadLine()?.Trim();
+            Console.Write("  Title: ");
+            string title = Console.ReadLine()?.Trim();
 
-            Task newTask = TaskFactory.Create(typeChoice, title, dueDate, extra);
+            bool isGoal = typeChoice != "1";
+
+            bool isRecurring = false;
+            string recurrenceLabel = "";
+            if (isGoal)
+            {
+                Console.Write("  Is this a recurring task? (y/n): ");
+                string recurInput = Console.ReadLine()?.Trim().ToLower();
+                if (recurInput == "y" || recurInput == "yes")
+                {
+                    isRecurring = true;
+                    Console.WriteLine("  How often?");
+                    Console.WriteLine("    1. Daily");
+                    Console.WriteLine("    2. Weekly");
+                    Console.WriteLine("    3. Monthly");
+                    Console.Write("  Choice: ");
+                    recurrenceLabel = Console.ReadLine()?.Trim() switch
+                    {
+                        "1" => "Daily",
+                        "2" => "Weekly",
+                        "3" => "Monthly",
+                        _   => "Daily"
+                    };
+                }
+            }
+
+            DateTime dueDate;
+            if (isRecurring)
+            {
+                Console.Write("  Target end date (MM-dd-yyyy, or Enter to skip): ");
+                string dateInput = Console.ReadLine()?.Trim();
+                if (string.IsNullOrEmpty(dateInput))
+                    dueDate = DateTime.Today.AddYears(1);
+                else if (!DateTime.TryParse(dateInput, out dueDate))
+                {
+                    Console.WriteLine("  [!] Invalid date. Using 1 year from today.");
+                    dueDate = DateTime.Today.AddYears(1);
+                }
+            }
+            else
+            {
+                Console.Write("  Due date (MM-dd-yyyy): ");
+                if (!DateTime.TryParse(Console.ReadLine()?.Trim(), out dueDate))
+                {
+                    Console.WriteLine("  [!] Invalid date. Task not added.");
+                    return;
+                }
+            }
+
+            string extra = "";
+            if (typeChoice == "1")
+            {
+                Console.Write("  Course name: ");
+                extra = Console.ReadLine()?.Trim();
+            }
+            else if (typeChoice == "6")
+            {
+                Console.Write("  Category (e.g. Hobby, Relationship): ");
+                extra = Console.ReadLine()?.Trim();
+            }
+
+            Task newTask = TaskFactory.Create(typeChoice, title, dueDate, extra, isRecurring, recurrenceLabel);
 
             tasks.Add(newTask);
             plan.AddTask(newTask);
 
             Console.WriteLine("  Task added successfully.");
+
+            BuildActionPlan(newTask, isGoal);
+        }
+
+        private void BuildActionPlan(Task task, bool isPersonalGoal)
+        {
+            Console.WriteLine("\n--- Build Your Action Plan ---");
+
+            Console.Write("  1. What is your biggest challenge or obstacle right now? ");
+            string challenge = Console.ReadLine()?.Trim();
+
+            bool recurring = task is PersonalGoal pg && pg.IsRecurring;
+            string timeQuestion = recurring
+                ? "  2. How much time can you commit per session? "
+                : "  2. How much time can you realistically commit each day to get this done? ";
+            Console.Write(timeQuestion);
+            string dailyTime = Console.ReadLine()?.Trim();
+
+            plan.SetPlanningContext(
+                string.IsNullOrWhiteSpace(challenge) ? "(not set)" : challenge,
+                string.IsNullOrWhiteSpace(dailyTime) ? "(not set)" : dailyTime,
+                isPersonalGoal
+            );
+
+            plan.DisplayWrittenPlan(task);
         }
 
         private void ViewPlan()
         {
             Console.WriteLine("\n--- Action Plan ---");
+
+            if (!plan.HasPlanningContext)
+            {
+                Console.WriteLine("  No action plan yet. Add a task first and your plan will be built automatically.");
+                return;
+            }
+
             plan.Display();
 
             Console.WriteLine("\n--- Suggested Schedule ---");
             plan.DistributeAcrossDays();
         }
 
-        private void DailyCheckin()
-        {
-            Console.WriteLine("\n--- Daily Check-in ---");
-            Console.WriteLine("How are you feeling today?");
-            Console.WriteLine("  1. Great");
-            Console.WriteLine("  2. Okay");
-            Console.WriteLine("  3. Stressed");
-            Console.Write("Choice: ");
-
-            string moodChoice = Console.ReadLine()?.Trim();
-            MoodStatus mood;
-
-            switch (moodChoice)
-            {
-                case "1":
-                    mood = MoodStatus.Great;
-                    break;
-                case "2":
-                    mood = MoodStatus.Okay;
-                    break;
-                case "3":
-                    mood = MoodStatus.Stressed;
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice. Mood set to Okay.");
-                    mood = MoodStatus.Okay;
-                    break;
-            }
-
-            Console.Write("Notes for today: ");
-            string notes = Console.ReadLine()?.Trim();
-
-            checkin.RecordMood(mood, notes);
-
-            Console.WriteLine("\nCheck-in saved:");
-            checkin.Display();
-        }
     }
 }

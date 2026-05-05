@@ -21,11 +21,11 @@ namespace StudentPlanner.Domain
         /// </summary>
         public abstract string GetSummary();
 
-        /// <summary>
-        /// Returns the course name associated with this task.
-        /// Defaults to empty string; overridden by Assignment.
-        /// </summary>
+        public string GetTitle() => title;
+        public DateTime GetDueDate() => dueDate;
+
         public virtual string GetCourseName() => string.Empty;
+        public virtual string GetCategory() => string.Empty;
 
         /// <summary>
         /// Prints the task summary to the console.
