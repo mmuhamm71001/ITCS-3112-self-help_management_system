@@ -88,7 +88,8 @@ namespace StudentPlanner.Presentation
 
             if (tasks.Count == 0)
             {
-                Console.WriteLine("  No tasks yet.");
+                Console.WriteLine("  You have no tasks yet. Add one from the menu.");
+                Console.WriteLine("\nPlease enter your choice again:");
                 return;
             }
 
@@ -149,8 +150,7 @@ namespace StudentPlanner.Presentation
 
             DateTime dueDate;
             if (isRecurring)
-            {
-                Console.Write("  Target end date (MM-dd-yyyy, or Enter to skip): ");
+            {1dd-yyyy, or Enter to skip): ");
                 string dateInput = Console.ReadLine()?.Trim();
                 if (string.IsNullOrEmpty(dateInput))
                     dueDate = DateTime.Today.AddYears(1);
