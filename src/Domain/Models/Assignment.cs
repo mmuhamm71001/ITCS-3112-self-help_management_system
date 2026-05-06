@@ -2,9 +2,6 @@ using System;
 
 namespace StudentPlanner.Domain
 {
-    /// <summary>
-    /// An academic assignment tied to a specific course.
-    /// </summary>
     public class Assignment : Task
     {
         private string courseName;
@@ -15,9 +12,6 @@ namespace StudentPlanner.Domain
             this.courseName = courseName;
         }
 
-        /// <summary>
-        /// Returns a summary including the course name and due date.
-        /// </summary>
         public override string GetSummary()
         {
             return $"[Assignment] {title} | Course: {courseName} | Due: {dueDate:yyyy-MM-dd} | Status: {status}";
@@ -28,12 +22,6 @@ namespace StudentPlanner.Domain
             return $"{email}|Assignment|{title}|{dueDate:yyyy-MM-dd}|{courseName}|false||0|{status}";
         }
 
-        /// <summary>
-        /// Returns the name of the course this assignment belongs to.
-        /// </summary>
-        public override string GetCourseName()
-        {
-            return courseName;
-        }
+        public override string GetCourseName() => courseName;
     }
 }

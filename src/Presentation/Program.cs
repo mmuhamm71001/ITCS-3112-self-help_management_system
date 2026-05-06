@@ -1,10 +1,9 @@
 //Zainab Dar: 801462977
 
-
 using System;
 using System.Collections.Generic;
 using StudentPlanner.Domain;
-using StudentPlanner.Presentation;
+using StudentPlanner.Repositories;
 
 namespace StudentPlanner
 {
@@ -18,22 +17,22 @@ namespace StudentPlanner
             Console.Write("Choice: ");
             string choice = Console.ReadLine()?.Trim();
 
-            var service = new UserService();
+            IUserRepository userRepo = new UserRepository();
             User user;
 
             if (choice == "2")
             {
-                user = RegisterFlow(service);
+                user = RegisterFlow(userRepo);
             }
             else
             {
-                user = LoginFlow(service);
+                user = LoginFlow(userRepo);
             }
 
             if (user == null) return;
 
             IActionPlan plan = new ActionPlan();
-            var taskService = new TaskService();
+            ITaskRepository taskRepo = new TaskRepository();
 
             if (choice == "2")
             {
@@ -41,11 +40,11 @@ namespace StudentPlanner
                 RunInitialCheckin(checkin);
             }
 
-            Dashboard dashboard = new Dashboard(user, plan, taskService);
+            var dashboard = new Presentation.Dashboard(user, plan, taskRepo);
             dashboard.Run();
         }
 
-        private static User RegisterFlow(UserService service)
+        private static User RegisterFlow(IUserRepository userRepo)
         {
             Console.WriteLine("\n--- Create Account ---");
 
@@ -58,7 +57,7 @@ namespace StudentPlanner
             Console.Write("Password : ");
             string password = Console.ReadLine()?.Trim();
 
-            User user = service.Register(name, email, password, new List<string>());
+            User user = userRepo.Register(name, email, password, new List<string>());
             if (user == null)
             {
                 Console.WriteLine("\n[!] An account with that email already exists. Exiting.");
@@ -83,8 +82,8 @@ namespace StudentPlanner
 
             switch (moodChoice)
             {
-                case "1": mood = MoodStatus.Great; break;
-                case "2": mood = MoodStatus.Okay; break;
+                case "1": mood = MoodStatus.Great;   break;
+                case "2": mood = MoodStatus.Okay;    break;
                 case "3": mood = MoodStatus.Stressed; break;
                 default:
                     Console.WriteLine("Invalid choice. Mood set to Okay.");
@@ -101,7 +100,7 @@ namespace StudentPlanner
             checkin.Display();
         }
 
-        private static User LoginFlow(UserService service)
+        private static User LoginFlow(IUserRepository userRepo)
         {
             Console.WriteLine("\n--- Log In ---");
 
@@ -111,7 +110,7 @@ namespace StudentPlanner
             Console.Write("Password : ");
             string password = Console.ReadLine()?.Trim();
 
-            User user = service.Login(email, password);
+            User user = userRepo.Login(email, password);
             if (user == null)
             {
                 Console.WriteLine("\n[!] Invalid email or password. Exiting.");

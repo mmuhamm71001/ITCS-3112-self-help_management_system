@@ -9,16 +9,16 @@ namespace StudentPlanner.Domain
         private bool isRecurring;
         private string recurrenceLabel;
 
-        public bool IsRecurring => isRecurring;
+        public bool IsRecurring      => isRecurring;
         public string RecurrenceLabel => recurrenceLabel;
 
         public PersonalGoal(string title, DateTime dueDate, string category,
             bool isRecurring = false, string recurrenceLabel = "")
             : base(title, dueDate)
         {
-            this.category       = category;
-            this.progressPct    = 0;
-            this.isRecurring    = isRecurring;
+            this.category        = category;
+            this.progressPct     = 0;
+            this.isRecurring     = isRecurring;
             this.recurrenceLabel = recurrenceLabel;
         }
 

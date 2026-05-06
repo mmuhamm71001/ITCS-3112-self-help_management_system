@@ -3,8 +3,7 @@ using System.Collections.Generic;
 namespace StudentPlanner.Domain
 {
     /// <summary>
-    /// Value type (struct) that aggregates task counts by status.
-    /// Used as a lightweight snapshot — no heap allocation needed for a small bag of counters.
+    /// Value type that aggregates task counts by status.
     /// </summary>
     public struct TaskStats
     {

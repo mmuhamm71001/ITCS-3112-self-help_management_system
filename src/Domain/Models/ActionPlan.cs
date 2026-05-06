@@ -119,8 +119,6 @@ namespace StudentPlanner.Domain
             Console.WriteLine($"  Tip: {tip}");
         }
 
-        // ── Style lookup ──────────────────────────────────────────────────
-
         private (string verb, string finishPhrase, string tip, string typeLabel) GetStyle(Task task)
         {
             if (!isPersonalGoal)
@@ -165,7 +163,6 @@ namespace StudentPlanner.Domain
                     "Learning Goal"
                 );
 
-            // Generic — use the capitalized category name as the label
             string label = string.IsNullOrWhiteSpace(cat) ? "Personal Goal"
                 : $"{task.GetCategory().Trim()} Goal";
             return (
@@ -176,11 +173,9 @@ namespace StudentPlanner.Domain
             );
         }
 
-        // ── Recurring habit plan ──────────────────────────────────────────
-
         private void DisplayRecurringPlan(Task task, string verb, string recurrenceLabel)
         {
-            string freq    = recurrenceLabel.ToLower(); // "daily", "weekly", "monthly"
+            string freq    = recurrenceLabel.ToLower();
             string freqAdv = freq == "weekly" ? "each week"
                            : freq == "monthly" ? "each month"
                            : "every day";
@@ -198,8 +193,6 @@ namespace StudentPlanner.Domain
             Console.WriteLine($"    This is now a habit. Guard your scheduled time — treat it like a commitment.");
             Console.WriteLine($"    Push for gradual improvement {freqAdv}: small increases compound over time.");
         }
-
-        // ── Deadline-based plans ──────────────────────────────────────────
 
         private void WriteDayByDayPlan(Task task, int daysLeft, string verb, string finishPhrase)
         {

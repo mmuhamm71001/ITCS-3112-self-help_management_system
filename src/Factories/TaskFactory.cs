@@ -1,6 +1,7 @@
 using System;
+using StudentPlanner.Domain;
 
-namespace StudentPlanner.Domain
+namespace StudentPlanner.Factories
 {
     public static class TaskFactory
     {

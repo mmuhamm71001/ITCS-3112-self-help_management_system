@@ -2,9 +2,6 @@ using System;
 
 namespace StudentPlanner.Domain
 {
-    /// <summary>
-    /// Abstract base class for all tasks in the planner.
-    /// </summary>
     public abstract class Task
     {
         protected string title;
@@ -20,13 +17,13 @@ namespace StudentPlanner.Domain
         public abstract string GetSummary();
         public abstract string Serialize(string email);
 
-        public string GetTitle() => title;
-        public DateTime GetDueDate() => dueDate;
-        public TaskStatus Status => status;
+        public string GetTitle()      => title;
+        public DateTime GetDueDate()  => dueDate;
+        public TaskStatus Status      => status;
         public void SetStatus(TaskStatus s) { status = s; }
 
         public virtual string GetCourseName() => string.Empty;
-        public virtual string GetCategory() => string.Empty;
+        public virtual string GetCategory()   => string.Empty;
 
         public void Display()
         {

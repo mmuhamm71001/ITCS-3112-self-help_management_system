@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using StudentPlanner.Domain;
+using StudentPlanner.Factories;
 
 namespace StudentPlanner.Presentation
 {
@@ -9,15 +10,15 @@ namespace StudentPlanner.Presentation
         private User currentUser;
         private List<Task> tasks;
         private IActionPlan plan;
-        private TaskService taskService;
+        private ITaskRepository taskRepository;
         private bool isRunning;
 
-        public Dashboard(User user, IActionPlan plan, TaskService taskService)
+        public Dashboard(User user, IActionPlan plan, ITaskRepository taskRepository)
         {
             currentUser = user;
             this.plan = plan;
-            this.taskService = taskService;
-            tasks = taskService.LoadTasks(user.GetEmail());
+            this.taskRepository = taskRepository;
+            tasks = taskRepository.LoadTasks(user.GetEmail());
             isRunning = false;
         }
 
@@ -59,30 +60,14 @@ namespace StudentPlanner.Presentation
 
             switch (input)
             {
-                case "1":
-                    ViewTasks();
-                    break;
-                case "2":
-                    AddTask();
-                    break;
-                case "3":
-                    DeleteTask();
-                    break;
-                case "4":
-                    UpdateTaskStatus();
-                    break;
-                case "5":
-                    ViewPlan();
-                    break;
-                case "6":
-                    ViewProfile();
-                    break;
-                case "7":
-                    isRunning = false;
-                    break;
-                default:
-                    HandleInvalidInput(input);
-                    break;
+                case "1": ViewTasks();        break;
+                case "2": AddTask();          break;
+                case "3": DeleteTask();       break;
+                case "4": UpdateTaskStatus(); break;
+                case "5": ViewPlan();         break;
+                case "6": ViewProfile();      break;
+                case "7": isRunning = false;  break;
+                default:  HandleInvalidInput(input); break;
             }
         }
 
@@ -104,9 +89,7 @@ namespace StudentPlanner.Presentation
             }
 
             foreach (var t in tasks)
-            {
                 t.Display();
-            }
         }
 
         private void DeleteTask()
@@ -121,9 +104,7 @@ namespace StudentPlanner.Presentation
             }
 
             for (int i = 0; i < tasks.Count; i++)
-            {
                 Console.WriteLine($"  {i + 1}. {tasks[i].GetSummary()}");
-            }
 
             Console.Write("\n  Enter the number of the task to delete: ");
             string input = Console.ReadLine()?.Trim();
@@ -136,7 +117,7 @@ namespace StudentPlanner.Presentation
 
             Task removed = tasks[choice - 1];
             tasks.RemoveAt(choice - 1);
-            taskService.SaveTasks(currentUser.GetEmail(), tasks);
+            taskRepository.SaveTasks(currentUser.GetEmail(), tasks);
             Console.WriteLine($"  Task \"{removed.GetTitle()}\" deleted successfully.");
         }
 
@@ -192,7 +173,7 @@ namespace StudentPlanner.Presentation
             if (newStatus == TaskStatus.Complete && task is PersonalGoal pg)
                 pg.UpdateProgress(100);
 
-            taskService.SaveTasks(currentUser.GetEmail(), tasks);
+            taskRepository.SaveTasks(currentUser.GetEmail(), tasks);
             Console.WriteLine($"  Status updated to: {newStatus}");
         }
 
@@ -304,7 +285,7 @@ namespace StudentPlanner.Presentation
 
             tasks.Add(newTask);
             plan.AddTask(newTask);
-            taskService.SaveTasks(currentUser.GetEmail(), tasks);
+            taskRepository.SaveTasks(currentUser.GetEmail(), tasks);
 
             Console.WriteLine("  Task added successfully.");
 
@@ -349,6 +330,5 @@ namespace StudentPlanner.Presentation
             Console.WriteLine("\n--- Suggested Schedule ---");
             plan.DistributeAcrossDays();
         }
-
     }
 }

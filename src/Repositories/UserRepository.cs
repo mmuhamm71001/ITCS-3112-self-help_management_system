@@ -1,25 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using StudentPlanner.Domain;
 
-namespace StudentPlanner.Domain
+namespace StudentPlanner.Repositories
 {
-    /// <summary>
-    /// Manages user registration and login. Persists accounts to a local file.
-    /// </summary>
-    public class UserService
+    public class UserRepository : IUserRepository
     {
         private static readonly string DataFile = "users.txt";
         private readonly List<User> users = new List<User>();
 
-        public UserService()
+        public UserRepository()
         {
             LoadUsers();
         }
 
-        /// <summary>
-        /// Creates a new account. Returns the new User, or null if the email is already taken.
-        /// </summary>
         public User Register(string name, string email, string password, List<string> goals)
         {
             foreach (var u in users)
@@ -32,9 +27,6 @@ namespace StudentPlanner.Domain
             return user;
         }
 
-        /// <summary>
-        /// Validates credentials and returns the matching User, or null on failure.
-        /// </summary>
         public User Login(string email, string password)
         {
             foreach (var u in users)
@@ -42,10 +34,6 @@ namespace StudentPlanner.Domain
                     return u;
             return null;
         }
-
-        // ------------------------------------------------------------------
-        // Private helpers
-        // ------------------------------------------------------------------
 
         private void SaveUsers()
         {

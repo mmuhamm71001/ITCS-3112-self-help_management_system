@@ -5,10 +5,6 @@ using System.Text;
 
 namespace StudentPlanner.Domain
 {
-    /// <summary>
-    /// Represents a registered user of the planner application.
-    /// Extends Person with authentication capabilities and goal tracking.
-    /// </summary>
     public class User : Person, IAuthenticatable
     {
         private string passwordHash;
@@ -54,32 +50,26 @@ namespace StudentPlanner.Domain
             return HashPassword(password) == passwordHash;
         }
 
-        /// <summary>Serializes user data to a pipe-delimited string for file storage.</summary>
         public string Serialize()
         {
             string goalList = goals.Count > 0 ? string.Join(";", goals) : "";
             return $"{name}|{email}|{passwordHash}|{goalList}";
         }
 
-        /// <summary>Reconstructs a User from a serialized line. Returns null if the line is malformed.</summary>
         public static User Deserialize(string line)
         {
             string[] parts = line.Split('|');
             if (parts.Length < 3) return null;
 
-            string name = parts[0];
+            string name  = parts[0];
             string email = parts[1];
-            string hash = parts[2];
+            string hash  = parts[2];
             var goals = new List<string>();
             if (parts.Length > 3 && !string.IsNullOrEmpty(parts[3]))
                 goals.AddRange(parts[3].Split(';'));
 
             return FromHash(name, email, hash, goals);
         }
-
-        // ------------------------------------------------------------------
-        // Private helpers
-        // ------------------------------------------------------------------
 
         private static string HashPassword(string password)
         {

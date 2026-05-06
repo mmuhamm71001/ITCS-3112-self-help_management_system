@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using StudentPlanner.Domain;
 
-namespace StudentPlanner.Domain
+namespace StudentPlanner.Repositories
 {
-    public class TaskService
+    public class TaskRepository : ITaskRepository
     {
         private static readonly string DataFile = "tasks.txt";
 
@@ -52,14 +53,14 @@ namespace StudentPlanner.Domain
         // Line format: email|type|title|dueDate|field1|isRecurring|recurrenceLabel|progressPct|status
         private static Task Deserialize(string[] parts)
         {
-            string type           = parts[1];
-            string title          = parts[2];
+            string type            = parts[1];
+            string title           = parts[2];
             if (!DateTime.TryParse(parts[3], out DateTime dueDate)) return null;
-            string field1         = parts[4]; // courseName or category
-            bool   isRecurring    = parts[5].Equals("true", StringComparison.OrdinalIgnoreCase);
+            string field1          = parts[4];
+            bool   isRecurring     = parts[5].Equals("true", StringComparison.OrdinalIgnoreCase);
             string recurrenceLabel = parts[6];
-            int    progressPct    = int.TryParse(parts[7], out int p) ? p : 0;
-            TaskStatus status     = Enum.TryParse<TaskStatus>(parts[8], out var s) ? s : TaskStatus.NotStarted;
+            int    progressPct     = int.TryParse(parts[7], out int p) ? p : 0;
+            TaskStatus status      = Enum.TryParse<TaskStatus>(parts[8], out var s) ? s : TaskStatus.NotStarted;
 
             Task task;
             if (type == "Assignment")
