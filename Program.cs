@@ -33,6 +33,7 @@ namespace StudentPlanner
             if (user == null) return;
 
             IActionPlan plan = new ActionPlan();
+            var taskService = new TaskService();
 
             if (choice == "2")
             {
@@ -40,7 +41,7 @@ namespace StudentPlanner
                 RunInitialCheckin(checkin);
             }
 
-            Dashboard dashboard = new Dashboard(user, plan);
+            Dashboard dashboard = new Dashboard(user, plan, taskService);
             dashboard.Run();
         }
 

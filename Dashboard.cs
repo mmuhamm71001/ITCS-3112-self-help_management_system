@@ -9,13 +9,15 @@ namespace StudentPlanner.Presentation
         private User currentUser;
         private List<Task> tasks;
         private IActionPlan plan;
+        private TaskService taskService;
         private bool isRunning;
 
-        public Dashboard(User user, IActionPlan plan)
+        public Dashboard(User user, IActionPlan plan, TaskService taskService)
         {
             currentUser = user;
-            tasks = new List<Task>();
             this.plan = plan;
+            this.taskService = taskService;
+            tasks = taskService.LoadTasks(user.GetEmail());
             isRunning = false;
         }
 
@@ -42,9 +44,11 @@ namespace StudentPlanner.Presentation
             Console.WriteLine("==============================");
             Console.WriteLine("  1. View my tasks");
             Console.WriteLine("  2. Add a task");
-            Console.WriteLine("  3. View action plan");
-            Console.WriteLine("  4. View my profile");
-            Console.WriteLine("  5. Exit");
+            Console.WriteLine("  3. Delete a task");
+            Console.WriteLine("  4. Update task status");
+            Console.WriteLine("  5. View action plan");
+            Console.WriteLine("  6. View my profile");
+            Console.WriteLine("  7. Exit");
             Console.WriteLine("==============================");
             Console.Write("Enter choice: ");
         }
@@ -62,12 +66,18 @@ namespace StudentPlanner.Presentation
                     AddTask();
                     break;
                 case "3":
-                    ViewPlan();
+                    DeleteTask();
                     break;
                 case "4":
-                    currentUser.DisplayProfile();
+                    UpdateTaskStatus();
                     break;
                 case "5":
+                    ViewPlan();
+                    break;
+                case "6":
+                    ViewProfile();
+                    break;
+                case "7":
                     isRunning = false;
                     break;
                 default:
@@ -79,7 +89,7 @@ namespace StudentPlanner.Presentation
         private void HandleInvalidInput(string input)
         {
             string display = string.IsNullOrWhiteSpace(input) ? "(empty)" : $"\"{input}\"";
-            Console.WriteLine($"\n  [!] {display} is not a valid option. Please enter a number from 1 to 5.");
+            Console.WriteLine($"\n  [!] {display} is not a valid option. Please enter a number from 1 to 7.");
         }
 
         private void ViewTasks()
@@ -97,6 +107,113 @@ namespace StudentPlanner.Presentation
             {
                 t.Display();
             }
+        }
+
+        private void DeleteTask()
+        {
+            Console.WriteLine("\n--- Delete a Task ---");
+
+            if (tasks.Count == 0)
+            {
+                Console.WriteLine("  You have no tasks to delete.");
+                Console.WriteLine("\nPlease enter your choice again:");
+                return;
+            }
+
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                Console.WriteLine($"  {i + 1}. {tasks[i].GetSummary()}");
+            }
+
+            Console.Write("\n  Enter the number of the task to delete: ");
+            string input = Console.ReadLine()?.Trim();
+
+            if (!int.TryParse(input, out int choice) || choice < 1 || choice > tasks.Count)
+            {
+                Console.WriteLine("  [!] Invalid selection. No task deleted.");
+                return;
+            }
+
+            Task removed = tasks[choice - 1];
+            tasks.RemoveAt(choice - 1);
+            taskService.SaveTasks(currentUser.GetEmail(), tasks);
+            Console.WriteLine($"  Task \"{removed.GetTitle()}\" deleted successfully.");
+        }
+
+        private void UpdateTaskStatus()
+        {
+            Console.WriteLine("\n--- Update Task Status ---");
+
+            if (tasks.Count == 0)
+            {
+                Console.WriteLine("  You have no tasks to update.");
+                Console.WriteLine("\nPlease enter your choice again:");
+                return;
+            }
+
+            for (int i = 0; i < tasks.Count; i++)
+                Console.WriteLine($"  {i + 1}. {tasks[i].GetSummary()}");
+
+            Console.Write("\n  Enter the number of the task to update: ");
+            string input = Console.ReadLine()?.Trim();
+
+            if (!int.TryParse(input, out int choice) || choice < 1 || choice > tasks.Count)
+            {
+                Console.WriteLine("  [!] Invalid selection.");
+                return;
+            }
+
+            Task task = tasks[choice - 1];
+
+            Console.WriteLine($"\n  Current status: {task.Status}");
+            Console.WriteLine("  New status:");
+            Console.WriteLine("    1. Not Started");
+            Console.WriteLine("    2. In Progress");
+            Console.WriteLine("    3. Complete");
+            Console.Write("  Choice: ");
+            string statusInput = Console.ReadLine()?.Trim();
+
+            TaskStatus newStatus = statusInput switch
+            {
+                "1" => TaskStatus.NotStarted,
+                "2" => TaskStatus.InProgress,
+                "3" => TaskStatus.Complete,
+                _   => task.Status
+            };
+
+            if (statusInput != "1" && statusInput != "2" && statusInput != "3")
+            {
+                Console.WriteLine("  [!] Invalid choice. Status not changed.");
+                return;
+            }
+
+            task.SetStatus(newStatus);
+
+            if (newStatus == TaskStatus.Complete && task is PersonalGoal pg)
+                pg.UpdateProgress(100);
+
+            taskService.SaveTasks(currentUser.GetEmail(), tasks);
+            Console.WriteLine($"  Status updated to: {newStatus}");
+        }
+
+        private void ViewProfile()
+        {
+            currentUser.DisplayProfile();
+
+            TaskStats stats = TaskStats.From(tasks);
+            Console.WriteLine($"\n  Task Summary: {stats.Total} total | {stats.NotStarted} not started | {stats.InProgress} in progress | {stats.Complete} complete");
+
+            Console.WriteLine("\n  Tasks:");
+            if (tasks.Count == 0)
+            {
+                Console.WriteLine("    (none)");
+            }
+            else
+            {
+                for (int i = 0; i < tasks.Count; i++)
+                    Console.WriteLine($"    {i + 1}. {tasks[i].GetSummary()}");
+            }
+            Console.WriteLine("====================");
         }
 
         private void AddTask()
@@ -150,7 +267,8 @@ namespace StudentPlanner.Presentation
 
             DateTime dueDate;
             if (isRecurring)
-            {1dd-yyyy, or Enter to skip): ");
+            {
+                Console.Write("  Due date (MM-dd-yyyy, or Enter to skip): ");
                 string dateInput = Console.ReadLine()?.Trim();
                 if (string.IsNullOrEmpty(dateInput))
                     dueDate = DateTime.Today.AddYears(1);
@@ -186,6 +304,7 @@ namespace StudentPlanner.Presentation
 
             tasks.Add(newTask);
             plan.AddTask(newTask);
+            taskService.SaveTasks(currentUser.GetEmail(), tasks);
 
             Console.WriteLine("  Task added successfully.");
 

@@ -20,7 +20,12 @@ namespace StudentPlanner.Domain
         /// </summary>
         public override string GetSummary()
         {
-            return $"[Assignment] {title} | Course: {courseName} | Due: {dueDate:yyyy-MM-dd}";
+            return $"[Assignment] {title} | Course: {courseName} | Due: {dueDate:yyyy-MM-dd} | Status: {status}";
+        }
+
+        public override string Serialize(string email)
+        {
+            return $"{email}|Assignment|{title}|{dueDate:yyyy-MM-dd}|{courseName}|false||0|{status}";
         }
 
         /// <summary>

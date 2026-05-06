@@ -29,7 +29,12 @@ namespace StudentPlanner.Domain
             string recurPart = isRecurring && !string.IsNullOrEmpty(recurrenceLabel)
                 ? $" | Recurring: {recurrenceLabel}"
                 : "";
-            return $"[Goal] {title} | Category: {category}{recurPart} | Progress: {progressPct}% | Due: {dueDate:yyyy-MM-dd}";
+            return $"[Goal] {title} | Category: {category}{recurPart} | Progress: {progressPct}% | Due: {dueDate:yyyy-MM-dd} | Status: {status}";
+        }
+
+        public override string Serialize(string email)
+        {
+            return $"{email}|PersonalGoal|{title}|{dueDate:yyyy-MM-dd}|{category}|{isRecurring}|{recurrenceLabel}|{progressPct}|{status}";
         }
 
         public void UpdateProgress(int pct)
